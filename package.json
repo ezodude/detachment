@@ -1,0 +1,23 @@
+{
+  "name": "detachment",
+  "version": "0.0.1",
+  "description": "Context.io client to download attachments from a linked mailbox.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rest",
+    "tools",
+    "attachments",
+    "imap",
+    "api",
+    "ContextIO",
+    "email"
+  ],
+  "author": "Ezo Saleh <npm@ezosaleh.com> (http://ezosaleh.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "contextio": "^1.0.0-beta-4"
+  }
+}
