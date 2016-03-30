@@ -19,11 +19,12 @@ program
   const opts = {
     key: program.key,
     secret: program.secret,
-    version: program.version || '2.0'
+    version: '2.0'
   };
+  const pullOpts = { dateAfter: program.dateAfter, outputDirectory: program.out,  filename: program.filename };
 
   const det = detachment(mailbox, opts);
-  const pullOpts = { dateAfter: program.dateAfter, outputDirectory: program.out,  filename: program.filename };
+  det.sync();
   const progressStream = det.pull(pullOpts, (err, data) => console.log(data));
 })
 .parse(process.argv);
