@@ -1,6 +1,7 @@
 'use strict';
 
-const _           = require('lodash')
+const fs          = require('fs')
+    , _           = require('lodash')
     ,  h          = require('highland')
     , ContextIO   = require('contextio');
 
@@ -27,6 +28,15 @@ const getAttachments = (accountId, opts, cb) => {
   .then(data => cb(null, data));
 };
 
+const getAttachmentContent = (accountId, fileId, cb) => {
+  // /2.0/accounts/id/files?date_after=timestamp&file_name=filename&limit=100
+  ctxioClient.accounts(accountId)
+  .files(fileId)
+  .content()
+  .get()
+  .then(data => cb(null, data));
+};
+
 function Detachment (mailbox, opts) {
   if (!(this instanceof Detachment)) return new Detachment(mailbox, opts);
   if (!opts) opts = {};
@@ -47,7 +57,19 @@ Detachment.prototype.pull = function (opts, cb) {
 
   this._getAccountId(this.mailbox)
   .flatMap(accountId => this._getAttachments(accountId, opts))
-  .each(data => cb(null, data));
+  .flatten()
+  .doto(attachment => {
+    console.log('Attachment filename', attachment.file_name)
+  })
+  .flatMap(attachment => {
+    const accountId = attachment.resource_url.split('/')[5];
+    return this._getAttachmentContent(accountId, attachment.file_id);
+  })
+  .each(data => {
+    const filename = data.headers['content-disposition'].split('=')[1].replace(/\"/g, '');
+    const outputDirectory = (opts.outputDirectory || 'dump') + '/' ;
+    h([data.body]).pipe(fs.createWriteStream( outputDirectory + filename));
+  });
 
   return this;
 };
@@ -58,4 +80,8 @@ Detachment.prototype._getAccountId = function (mailbox) {
 
 Detachment.prototype._getAttachments = function (accountId, opts) {
   return h.wrapCallback(getAttachments)(accountId, opts);
+};
+
+Detachment.prototype._getAttachmentContent = function (accountId, fileId) {
+  return h.wrapCallback(getAttachmentContent)(accountId, fileId);
 };
