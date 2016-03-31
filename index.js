@@ -12,6 +12,11 @@ module.exports = Detachment;
 // METHOD /RESOURCE/INSTANCE_ID/SUB_RESOURCE?PARAMS
 // ctxioClient.RESOURCE(INSTANCE_ID).SUB_RESOURCE().METHOD(PARAMS).then(success_handler)
 
+const getAccountId = (mailbox, cb) => {
+  // /2.0/accounts?email=someemail%40email.com&limit=1
+  ctxioClient.accounts().get({ email: mailbox, limit: 1 }).then(data => cb(null, data[0].id));
+};
+
 function Detachment (mailbox, opts) {
   if (!(this instanceof Detachment)) return new Detachment(mailbox, opts);
   if (!opts) opts = {};
@@ -28,18 +33,12 @@ function Detachment (mailbox, opts) {
 }
 
 Detachment.prototype.sync = function () {
-  // /2.0/accounts?email=report1%40buffaloproject.com&limit=1
-  const wrapper = (cb) => {
-    ctxioClient.accounts().get({ email: this.mailbox, limit: 1 }).then(data => cb(null, data[0].id));
-  };
-
-  this.accountId = h.wrapCallback(wrapper)();
+  this.accountId = h.wrapCallback(getAccountId)(this.mailbox);
   return this;
 };
 
 Detachment.prototype.pull = function (opts, cb) {
   console.log('Detachment#pull OPTS', opts);
   this.accountId.each(data => cb(null, data));
-  // cb(null, ['attachment-a', 'attachment-b']);
   return h();
 };
