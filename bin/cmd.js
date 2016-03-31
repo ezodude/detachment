@@ -22,9 +22,7 @@ program
     version: '2.0'
   };
   const pullOpts = { dateAfter: program.dateAfter, outputDirectory: program.out,  filename: program.filename };
-
   const det = detachment(mailbox, opts);
-  det.sync();
-  const progressStream = det.pull(pullOpts, (err, data) => console.log(data));
+  det.pull(pullOpts, (err, data) => console.log(data));
 })
 .parse(process.argv);
