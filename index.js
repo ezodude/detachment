@@ -42,29 +42,20 @@ function Detachment (mailbox, opts) {
   });
 }
 
-Detachment.prototype.getAccountId = function () {
-  this.accountId = h.wrapCallback(getAccountId)(this.mailbox);
-  return this;
-};
-
-Detachment.prototype.getAttachments = function () {
-  this.attachments = h.partial(h.wrapCallback(getAttachments));
-  return this;
-};
-
-Detachment.prototype.prep = function () {
-  this.getAccountId();
-  this.getAttachments();
-  return this;
-};
-
 Detachment.prototype.pull = function (opts, cb) {
   console.log('Detachment#pull OPTS', opts);
-  this.prep();
 
-  this.accountId
-  .flatMap(accountId => this.attachments(accountId, opts))
+  this._getAccountId(this.mailbox)
+  .flatMap(accountId => this._getAttachments(accountId, opts))
   .each(data => cb(null, data));
 
   return this;
+};
+
+Detachment.prototype._getAccountId = function (mailbox) {
+  return h.wrapCallback(getAccountId)(mailbox);
+};
+
+Detachment.prototype._getAttachments = function (accountId, opts) {
+  return h.wrapCallback(getAttachments)(accountId, opts);
 };
