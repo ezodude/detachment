@@ -25,6 +25,7 @@
     "commander": "^2.9.0",
     "contextio": "^1.0.0-beta-4",
     "highland": "^2.7.2",
-    "lodash": "^4.6.1"
+    "lodash": "^4.6.1",
+    "superagent": "^1.8.3"
   }
 }

@@ -3,7 +3,8 @@
 const fs          = require('fs')
     , _           = require('lodash')
     ,  h          = require('highland')
-    , ContextIO   = require('contextio');
+    , ContextIO   = require('contextio')
+    , request     = require('superagent');
 
 let ctxioClient;
 
@@ -33,7 +34,7 @@ const getAttachmentContent = (accountId, fileId, cb) => {
   ctxioClient.accounts(accountId)
   .files(fileId)
   .content()
-  .get()
+  .get({ as_link: 1 })
   .then(data => cb(null, data));
 };
 
@@ -66,9 +67,9 @@ Detachment.prototype.pull = function (opts, cb) {
     return this._getAttachmentContent(accountId, attachment.file_id);
   })
   .each(data => {
-    const filename = data.headers['content-disposition'].split('=')[1].replace(/\"/g, '');
-    const outputDirectory = (opts.outputDirectory || 'dump') + '/' ;
-    h([data.body]).pipe(fs.createWriteStream( outputDirectory + filename));
+    const match = /^https\:\/\/.*\/.*\/.*\/.*\/(.*)\?.*$/i.exec(data);
+    const outPath = opts.outputDirectory + '/' + match[1];
+    request.get(data).pipe(fs.createWriteStream(outPath));
   });
 
   return this;
