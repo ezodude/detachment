@@ -5,7 +5,8 @@
 // dtch -k some-key -s some-secret -d '2016-03-01' -f 'Daily_Report*' -o 'attachments_2016-03-30' 'user@email-address.com'
 
 const program     = require('commander')
-    , detachment = require('../');
+    , mkdirp      = require('mkdirp')
+    , detachment  = require('../');
 
 program
 .usage('[options] <mailbox>')
@@ -21,7 +22,10 @@ program
     secret: program.secret,
     version: '2.0'
   };
-  const pullOpts = { dateAfter: program.dateAfter, outputDirectory: program.out,  filename: program.filename };
+  const pullOpts = { dateAfter: program.dateAfter, outputDirectory: program.out || 'dump',  filename: program.filename };
+
+  mkdirp.sync(pullOpts.outputDirectory);
+
   const det = detachment(mailbox, opts);
   det.pull(pullOpts, (err, data) => console.log(data));
 })
