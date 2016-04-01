@@ -42,9 +42,6 @@ function Detachment (mailbox, opts) {
   if (!(this instanceof Detachment)) return new Detachment(mailbox, opts);
   if (!opts) opts = {};
 
-  console.log('Detachment MAILBOX', mailbox);
-  console.log('Detachment OPTS', opts);
-
   this.mailbox = mailbox;
   ctxioClient = ContextIO({
     key: opts.key,
@@ -54,13 +51,13 @@ function Detachment (mailbox, opts) {
 }
 
 Detachment.prototype.pull = function (opts, cb) {
-  console.log('Detachment#pull OPTS', opts);
+  const outputDirectory = opts.outputDirectory + '/'
 
   this._getAccountId(this.mailbox)
   .flatMap(accountId => this._getAttachments(accountId, opts))
   .flatten()
   .doto(attachment => {
-    console.log('Attachment filename', attachment.file_name)
+    console.log('Attachment:', outputDirectory + attachment.file_name)
   })
   .flatMap(attachment => {
     const accountId = attachment.resource_url.split('/')[5];
@@ -68,7 +65,7 @@ Detachment.prototype.pull = function (opts, cb) {
   })
   .each(data => {
     const match = /^https\:\/\/.*\/.*\/.*\/.*\/(.*)\?.*$/i.exec(data);
-    const outPath = opts.outputDirectory + '/' + match[1];
+    const outPath = outputDirectory + match[1];
     request.get(data).pipe(fs.createWriteStream(outPath));
   });
 
