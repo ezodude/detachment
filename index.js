@@ -8,6 +8,8 @@ const fs        = require('fs')
 
 module.exports = Detachment;
 
+const SIXTY_SECS_RATE_LIMIT = 1000 * 60;
+
 function Detachment (mailbox, opts) {
   if (!(this instanceof Detachment)) return new Detachment(mailbox, opts);
   if (!opts) opts = {};
@@ -21,6 +23,7 @@ Detachment.prototype.pull = function (opts, cb) {
   this._getAccountId(this.mailbox)
   .flatMap(accountId => this._getAttachments(accountId, opts))
   .flatten()
+  .ratelimit(10, SIXTY_SECS_RATE_LIMIT)
   .doto(attachment => {
     console.log('Attachment:', outputDirectory + attachment.file_name)
   })
