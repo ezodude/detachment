@@ -1,10 +1,10 @@
 'use strict';
 
-const fs          = require('fs')
-    , _           = require('lodash')
-    ,  h          = require('highland')
-    , contextio   = require('./lib/api')
-    , request     = require('superagent');
+const fs        = require('fs')
+    , _         = require('lodash')
+    , h         = require('highland')
+    , contextio = require('./lib/api')
+    , request   = require('superagent');
 
 module.exports = Detachment;
 
