@@ -26,7 +26,13 @@ program
 
   mkdirp.sync(pullOpts.outputDirectory);
 
-  const det = detachment(mailbox, opts);
-  det.pull(pullOpts, (err, data) => console.log(data));
+  try{
+    const det = detachment(mailbox, opts);
+    det.sync();
+    det.pull(pullOpts, (err, data) => console.log(data));
+  }catch(e){
+    console.log(e);
+  }
+
 })
 .parse(process.argv);

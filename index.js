@@ -17,11 +17,19 @@ function Detachment (mailbox, opts) {
   this.contextio = contextio(opts);
 }
 
+Detachment.prototype.sync = function () {
+  this.account =
+    this._getAccountId(this.mailbox)
+    .doto(id => this._syncAccount(id));
+};
+
 Detachment.prototype.pull = function (opts, cb) {
+  if(!this.account) { throw 'Please sync account before pulling down attachments.'; }
+
   const outputDirectory = opts.outputDirectory + '/'
 
-  this._getAccountId(this.mailbox)
-  .flatMap(accountId => this._getAttachments(accountId, opts))
+  this.account
+  .flatMap(account => this._getAttachments(account, opts))
   .flatten()
   .ratelimit(10, SIXTY_SECS_RATE_LIMIT)
   .doto(attachment => {
@@ -42,6 +50,10 @@ Detachment.prototype.pull = function (opts, cb) {
 
 Detachment.prototype._getAccountId = function (mailbox) {
   return h.wrapCallback(this.contextio.getAccountId).bind(this.contextio)(mailbox);
+};
+
+Detachment.prototype._syncAccount = function (accountId) {
+  return h.wrapCallback(this.contextio.syncAccount).bind(this.contextio)(accountId);
 };
 
 Detachment.prototype._getAttachments = function (accountId, opts) {
